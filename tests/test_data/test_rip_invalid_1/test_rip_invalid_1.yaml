@@ -1,0 +1,16 @@
+survey: WAVES
+dataset: test_rip_valid_1
+version: 1.0
+date: "2025-11-28"
+author: Dior Etherton <dior.etherton@uwa.edu.au>
+coauthors: 
+- Gracie Etherton <dior.etherton@uwa.edu.au>
+description: This is a test RIP with one catalogue. 
+comments: 
+- All data and metadata is valid. 
+license: Copyright WAVES [Private]
+tables: 
+- name: catalogue_1
+  version: 1.0
+- name: catalogue_2
+  version: 1.0

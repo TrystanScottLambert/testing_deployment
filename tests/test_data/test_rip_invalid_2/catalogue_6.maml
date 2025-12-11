@@ -1,0 +1,17 @@
+survey: WAVES
+dataset: test_rip_invalid_2
+table: catalogue_6
+version: 1.0
+date: "2025-12-02"
+author: Dior Etherton <dior.etherton@uwa.edu.au>
+coauthors: coauthor_should_be_a_list <coauthor.should.be.a.list@uwa.edu.au>
+description: This is a test MAML with all correct data except for list/scalar types being incorrect. 
+comments: Incorrectly formatted comment (should be a list). 
+license: Copyright WAVES [Private]
+MAML_version: 1.1
+fields:
+  name: should_be_list_item
+  unit: unitless
+  info: Field item should be a list item. 
+  ucd: meta.id;meta.main
+  data_type: string

@@ -1,0 +1,21 @@
+survey: 
+dataset: 
+table: 
+version: 
+date: 
+author: 
+coauthors: 
+description: 
+comments: 
+- Empty MAML for unit testing. 
+license: 
+MAML_version: 
+fields:
+- name: 
+  unit: 
+  info: 
+  ucd: 
+  data_type: 
+  qc:
+    min: 
+    max: 

@@ -1,0 +1,35 @@
+survey: illegal_survey
+dataset: incorrect_dataset
+table: incorrect_table
+version: 1.0
+date: December 12 2025
+author: Missing Email
+coauthors: 
+- Correct Email <correct.email@uwa.edu.au>
+- <missing.name@uwa.edu.au>
+- Duplicate Entry <duplicate.entry@uwa.edu.au>
+- Duplicate Entry <duplicate.entry@uwa.edu.au>
+- Illegal Email <illegal.email>
+- Incorrect Format1 <incorrect.format@uwa.edu.au
+- Incorrect Format2 incorrect.format@uwa.edu.au>
+- Incorrect Format3 incorrect.format@uwa.edu.au
+- Crazy Email <crazy__email++@uwa.edu.au>
+- Crazy Email2 <crazy__email__@uwa.edu.au>
+- Crazy Email3 <crazy_._3mai1_._@uwa.edu.au>
+description: This is a test catalogue for a test RIP. 
+comments: 
+- No affiliated data, this is just a faulty MAML. 
+- Errors include: illegal survey, incorrect dataset, incorrect table, illegal licence, illegal MAML version, illegal data types, extra (illegal) miss field. 
+- Invalid formats include: date, author, coauthors. 
+license: Copyright Dior 2025
+MAML_version: 1.2
+fields:
+- name: uberID
+  unit: unitless
+  info: Unique WAVES ID
+  ucd: meta.id;meta.main
+  data_type: int64
+  qc:
+    min: '1'
+    max: '9223372036854775807'
+    miss: 'Null'

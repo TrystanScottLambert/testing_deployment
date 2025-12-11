@@ -1,36 +1,31 @@
-name: Build All Binaries
+name: Build and Release Binaries
 
 on:
-  workflow_dispatch:
   push:
-    branches: [ main ]
+    tags:
+      - "v*"
 
 jobs:
-
-  # ---------------------------
-  # macOS ARM64 (Apple Silicon)
-  # ---------------------------
-  macos-arm64:
-    name: macOS ARM64 Build
+  build-macos-arm:
+    name: macOS ARM64
     runs-on: macos-15
     steps:
       - uses: actions/checkout@v4
 
-      - name: Set up Python 3.12
+      - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.12"
 
       - name: Install dependencies
         run: |
-          pip install --upgrade pip
+          python -m pip install --upgrade pip
           pip install -r requirements.txt
           pip install pyinstaller
           pip install -e .
 
-      - name: Build ARM64 binary
+      - name: Build macOS ARM binary
         run: |
-          rm -rf build dist
           pyinstaller \
             --onefile \
             --target-arch arm64 \
@@ -54,35 +49,32 @@ jobs:
             rip_validator/cli.py
           mv dist/valrip dist/valrip-macos-arm64
 
-      - uses: actions/upload-artifact@v4
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
         with:
           name: valrip-macos-arm64
           path: dist/valrip-macos-arm64
 
-  # ---------------------------
-  # macOS Intel (x86_64)
-  # ---------------------------
-  macos-x86_64:
-    name: macOS Intel Build
+  build-macos-intel:
+    name: macOS Intel
     runs-on: macos-15-intel
     steps:
       - uses: actions/checkout@v4
 
-      - name: Set up Python 3.12
+      - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.12"
 
       - name: Install dependencies
         run: |
-          pip install --upgrade pip
+          python -m pip install --upgrade pip
           pip install -r requirements.txt
           pip install pyinstaller
           pip install -e .
 
-      - name: Build Intel binary
+      - name: Build macOS Intel binary
         run: |
-          rm -rf build dist
           pyinstaller \
             --onefile \
             --target-arch x86_64 \
@@ -106,62 +98,69 @@ jobs:
             rip_validator/cli.py
           mv dist/valrip dist/valrip-macos-x86_64
 
-      - uses: actions/upload-artifact@v4
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
         with:
           name: valrip-macos-x86_64
           path: dist/valrip-macos-x86_64
 
-  # ---------------------------
-  # Linux AMD64 build (Docker)
-  # ---------------------------
-  linux-amd64:
-    name: Linux amd64 Build
+  build-linux:
+    name: Linux builds
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 
-      - name: Build AMD64 in Docker
+      - name: Build Linux x86_64 and ARM64
         run: |
-          rm -rf build dist
-          docker run --rm --platform linux/amd64 \
-            -v "$PWD:/src" python:3.12 bash -c "
-              cd /src && \
-              pip install pyinstaller && \
-              pip install -r requirements.txt && \
-              pip install -e . && \
-              pyinstaller valrip.spec
-            "
-          mv dist/valrip dist/valrip-linux-amd64
+          docker run --rm --platform linux/amd64 -v "$(pwd):/src" python:3.12 bash -c "
+            cd /src && \
+            pip install pyinstaller && \
+            pip install -r requirements.txt && \
+            pip install -e . && \
+            pyinstaller valrip.spec && \
+            mv dist/valrip dist/valrip-linux-amd64
+          "
+          docker run --rm --platform linux/arm64 -v "$(pwd):/src" python:3.12 bash -c "
+            cd /src && \
+            pip install pyinstaller && \
+            pip install -r requirements.txt && \
+            pip install -e . && \
+            pyinstaller valrip.spec && \
+            mv dist/valrip dist/valrip-linux-arm64
+          "
 
-      - uses: actions/upload-artifact@v4
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
         with:
-          name: valrip-linux-amd64
-          path: dist/valrip-linux-amd64
+          name: linux-binaries
+          path: |
+            dist/valrip-linux-amd64
+            dist/valrip-linux-arm64
 
-  # ---------------------------
-  # Linux ARM64 build (Docker)
-  # ---------------------------
-  linux-arm64:
-    name: Linux arm64 Build
+  release:
+    name: Release
     runs-on: ubuntu-latest
+    needs:
+      - build-macos-arm
+      - build-macos-intel
+      - build-linux
+
     steps:
-      - uses: actions/checkout@v4
-
-      - name: Build ARM64 in Docker
-        run: |
-          rm -rf build dist
-          docker run --rm --platform linux/arm64 \
-            -v "$PWD:/src" python:3.12 bash -c "
-              cd /src && \
-              pip install pyinstaller && \
-              pip install -r requirements.txt && \
-              pip install -e . && \
-              pyinstaller valrip.spec
-            "
-          mv dist/valrip dist/valrip-linux-arm64
-
-      - uses: actions/upload-artifact@v4
+      - name: Download artifacts
+        uses: actions/download-artifact@v4
         with:
-          name: valrip-linux-arm64
-          path: dist/valrip-linux-arm64
+          path: artifacts
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          draft: false
+          prerelease: false
+          files: |
+            artifacts/valrip-macos-arm64/valrip-macos-arm64
+            artifacts/valrip-macos-x86_64/valrip-macos-x86_64
+            artifacts/linux-binaries/valrip-linux-amd64
+            artifacts/linux-binaries/valrip-linux-arm64
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
